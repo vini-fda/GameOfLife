@@ -9,6 +9,6 @@ include_directories(${SDL2_INCLUDE_DIRS})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 add_executable(GameOfLife
-        main.c)
+        main.c GOL.c GOL.h)
 
 target_link_libraries(GameOfLife ${SDL2_LIBRARIES})
