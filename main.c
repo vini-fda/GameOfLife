@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "GOL.h"
 
 typedef int bool;
@@ -72,44 +71,35 @@ int main(int argc, char *args[]) {
     wrld.w = w;
     wrld.h = h;
     initialize_world(&wrld);
-    //int k = wrld.cells[0];
-    //First condition
+
+    //Only start if initialization was successful
     if (init(&ctx)) {
         bitmapTex = SDL_CreateTexture(ctx.renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, w, h);
         if(bitmapTex == NULL) {
             printf("Error: texture could not be created. Full SDL error: %s\n", SDL_GetError());
         }
+
+        //Pixel buffer for the texture
         uint32_t* pixels = NULL;
+        //The pitch is the length of one row in bytes of the given texture
         int pitch;
 
-//        if(result != 0)
-//            printf("Error locking texture. Full SDl Error: %s\n", SDL_GetError());
-//        //Start render
-          SDL_PixelFormat* rgba8888 = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
-          uint32_t p;
-          int row_len = pitch / sizeof(uint32_t);
-//        printf("pitch: %d, row_len: %d, size: %d\n", pitch, row_len, sizeof(uint32_t));
-//        printf("bytes per pixel: %d\n", rgba8888->BytesPerPixel);
-//        //TODO:Clean up main()
-//        for (int y = 0; y < h; y++) {
-//            for (int x = 0; x < w; x++) {
-//                p = 255*wrld.cells[x + y*w];
-//                pixels[x + y*w] = SDL_MapRGBA(rgba8888, p, p, p, 255);
-//            }
-//        }
-//        //End render
-//        SDL_UnlockTexture(bitmapTex);
-//        SDL_FreeFormat(rgba8888);
-        //int result;
+        //Get the RGBA8888 pixel format
+        SDL_PixelFormat* rgba8888 = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+        uint32_t p;
+
         //Main loop
         while (!ctx.quit) {
+            //Get user input through polling
             while (SDL_PollEvent(&ctx.e) != 0) {
                 if (ctx.e.type == SDL_QUIT)
                     ctx.quit = true;
             }
+            //Update physics/world
             update_world(&wrld);
+            //Enable writing to texture
             SDL_LockTexture(bitmapTex, NULL, (void**) &pixels, &pitch);
-            //Start render
+            //Start writing to texture
             //TODO:GPU acceleration
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
@@ -117,10 +107,10 @@ int main(int argc, char *args[]) {
                     pixels[x + y*w] = SDL_MapRGBA(rgba8888, p, p, p, 255);
                 }
             }
-            //End render
+            //End writing to texture
             SDL_UnlockTexture(bitmapTex);
 
-
+            //Rendering
             SDL_RenderClear(ctx.renderer);
             SDL_RenderCopy(ctx.renderer, bitmapTex, NULL, NULL);
             SDL_RenderPresent(ctx.renderer);
